@@ -1,3 +1,5 @@
+*This is a modified version of GluePHP.*
+
 Glue
 ====
 
