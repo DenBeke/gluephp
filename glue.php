@@ -1,4 +1,40 @@
 <?php
+/*
+URL handler
+
+Author (modifier): Mathias Beke
+Url: http://denbeke.be
+Date: March 2014
+
+
+This is a modified version of GluePHP.
+GluePHP was originally created by Joe Topjian and can be found at gluephp.com
+
+
+Copyright (c) 2012, Joe Topjian
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of Joe Topjian nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL JOE TOPJIAN BE LIABLE FOR ANY
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
     /**
      * glue
@@ -57,11 +93,21 @@
                     $found = true;
                     if (class_exists($class)) {
                         $obj = new $class;
-                        if (method_exists($obj, $method)) {
-                            $obj->$method($matches);
-                        } else {
+                        if (method_exists($obj, 'GET')) {
+                        	$obj->GET($matches);
+                        }
+                        else {
                             throw new BadMethodCallException("Method, $method, not supported.");
                         }
+                        if($method == 'POST') {
+	                        if (method_exists($obj, $method)) {
+	                            $obj->$method($matches);
+	                        } 
+	                        else {
+	                            throw new BadMethodCallException("Method, $method, not supported.");
+	                        }
+	                    }
+                        return $obj;
                     } else {
                         throw new Exception("Class, $class, not found.");
                     }
@@ -69,6 +115,24 @@
                 }
             }
             if (!$found) {
+              
+                foreach ($urls as $regex => $class) {
+                	if($regex == 'ERROR') {
+                		if (class_exists($class)) {
+                		    $obj = new $class;
+                		    if (method_exists($obj, $method)) {
+                		        $obj->$method($matches);
+                		        return $obj;
+                		    } else {
+                		        throw new BadMethodCallException("Method, $method, not supported.");
+                		    }
+                		} else {
+                		    throw new Exception("Class, $class, not found.");
+                		}
+                		break;
+                	}
+                }
+                
                 throw new Exception("URL, $path, not found.");
             }
         }
